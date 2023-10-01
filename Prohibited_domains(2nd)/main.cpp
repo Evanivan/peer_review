@@ -39,12 +39,6 @@ public:
         bool is_domain = tmp == domain_;
         return is_domain;
     }
-//    bool IsSubdomain(const Domain& rhs) const {
-//        size_t pos_of_el = rhs.domain_.find(domain_);
-//        bool find_domain = pos_of_el != std::string::npos;
-//        size_t pos = distance(rhs.domain_.begin() + pos_of_el, rhs.domain_.end());
-//        return find_domain && pos == domain_.size();
-//    }
 
     [[nodiscard]] const string& GetDomain() const {
         return domain_;
@@ -214,18 +208,3 @@ int main() {
     }
     return 0;
 }
-
-
-//2
-//gdz.ru
-//maps.me
-//1
-//m.maps.me
-
-//4
-//gdz.ru
-//maps.me
-//m.gdz.ru
-//com
-//1
-//m.maps.me
