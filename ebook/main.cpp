@@ -1,70 +1,86 @@
-#include <algorithm>
+//ebook implementation
 #include <iostream>
-#include <string>
+#include <unordered_map>
 #include <vector>
+#include <algorithm>
+#include <iomanip>
+#include <set>
 
-using namespace std;
+using namespace std::literals;
 
-enum class Gender { FEMALE, MALE };
-
-struct Person {
-    int age;           // возраст
-    Gender gender;     // пол
-    bool is_employed;  // имеет ли работу
+class ReadingUsers {
+    std::vector<std::int16_t> id_to_page;
+    std::vector<std::uint32_t> users_to_page;
+    std::vector<double> cheers;
+    std::set<std::uint32_t> real_users;
+    void PutRead(std::uint32_t id, std::int16_t current_page);
+    double CalcShare(std::uint32_t index);
+    void PutCheer(std::uint32_t id);
+public:
+    ReadingUsers()
+        : id_to_page(100001), users_to_page(1001){}
+    void InputRequests(std::istream& input_stream);
+    void OutPut();
 };
 
-template <typename InputIt>
-int ComputeMedianAge(InputIt range_begin, InputIt range_end) {
-    if (range_begin == range_end) {
-        return 0;
+void ReadingUsers::OutPut() {
+    std::cout << std::setprecision(6);
+    for (double cheer : cheers) {
+        std::cout << cheer << std::endl;
     }
-    vector<typename InputIt::value_type> range_copy(range_begin, range_end);
-    auto middle = range_copy.begin() + range_copy.size() / 2;
-    nth_element(range_copy.begin(), middle, range_copy.end(), [](const Person& lhs, const Person& rhs) {
-        return lhs.age < rhs.age;
-    });
-    return middle->age;
 }
 
-// напишите сигнатуру и реализацию функции PrintStats
-void PrintStats(vector<Person> people) {
-    cout << "Median age = "s << ComputeMedianAge(people.begin(), people.end()) << endl;
+double ReadingUsers::CalcShare(std::uint32_t index) {
+    auto page = id_to_page.at(index);
+    auto readers = users_to_page.at(page);
+    auto all_users = real_users.size() - 1;
+    auto portion_users = real_users.size() - readers;
 
-    auto it_only_fem = std::partition(people.begin(), people.end(), [&](Person person) {
-        return person.gender == Gender::FEMALE;});
-    cout << "Median age for females = "s << ComputeMedianAge(begin(people), it_only_fem) << endl;
-    cout << "Median age for males = "s << ComputeMedianAge(it_only_fem, people.end()) << endl;
+    double fin_res = (double )(portion_users) / (double)all_users;
+    return fin_res;
+}
 
-    auto it_only_fem_empl = std::partition(people.begin(), people.end(), [&](Person person) {
-        return person.gender == Gender::FEMALE && person.is_employed;});
-    cout << "Median age for employed females = "s << ComputeMedianAge(begin(people), it_only_fem_empl) << endl;
-    auto it_only_fem_unempl = std::partition(people.begin(), people.end(), [&](Person person) {
-        return person.gender == Gender::FEMALE && !person.is_employed;});
-    cout << "Median age for unemployed females = "s << ComputeMedianAge(begin(people), it_only_fem_unempl) << endl;
+void ReadingUsers::PutRead(std::uint32_t id, std::int16_t current_page) {
+    for (auto i = id_to_page[id] + 1; i <= current_page;){
+        ++users_to_page[i];
+        ++i;
+    }
+    id_to_page[id] = current_page;
+    real_users.emplace(id);
+}
 
-    auto it_only_mal_empl = std::partition(people.begin(), people.end(), [&](Person person) {
-        return person.gender == Gender::MALE && person.is_employed;});
-    cout << "Median age for employed males = " << ComputeMedianAge(begin(people), it_only_mal_empl) << endl;
+void ReadingUsers::PutCheer(std::uint32_t id) {
+    if (real_users.size() == 1 && id_to_page.at(id)) {
+        cheers.emplace_back(1.0);
+    } else if (id_to_page.at(id)) {
+        cheers.emplace_back(CalcShare(id ));
+    } else {
+        cheers.emplace_back(0.0);
+    }
+}
 
-    auto it_only_mal_unempl = std::partition(people.begin(), people.end(), [&](Person person) {return person.gender == Gender::MALE
-                                                                                                    && !person.is_employed;});
-    cout << "Median age for unemployed males = "s << ComputeMedianAge(begin(people), it_only_mal_unempl) << endl;
+void ReadingUsers::InputRequests(std::istream& input_stream) {
+    std::uint32_t count = 0, id = 0;
+    std::int16_t current_page;
+    std::string request_type;
+
+    input_stream >> count;
+    for (int i = 0; i < count; ++i) {
+        input_stream >> request_type;
+        if (request_type == "READ"s) {
+            input_stream >> id;
+            input_stream >> current_page;
+            PutRead(id, current_page);
+        } else if (request_type == "CHEER"s) {
+            input_stream >> id;
+            PutCheer(id);
+        }
+    }
 }
 
 int main() {
-    vector<Person> persons = {
-            {31, Gender::MALE, false},   {40, Gender::FEMALE, true},  {24, Gender::MALE, true},
-            {20, Gender::FEMALE, true},  {80, Gender::FEMALE, false}, {78, Gender::MALE, false},
-            {10, Gender::FEMALE, false}, {55, Gender::MALE, true},
-    };
-
-    vector<Person> only_men = {
-            {31, Gender::MALE, false},   {24, Gender::MALE, true},
-            {78, Gender::MALE, false},
-            {55, Gender::MALE, true},
-    };
-    PrintStats(persons);
-    PrintStats(only_men);
-//    PrintStats(persons);
-//    PrintStats(persons);
+    ReadingUsers users;
+    users.InputRequests(std::cin);
+    users.OutPut();
+    return 0;
 }

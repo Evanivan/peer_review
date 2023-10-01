@@ -1,0 +1,3 @@
+/Users/jgloria/CLionProjects/Praktikum_CLion/Sprint13/Refactoring/peer_review3/cmake-build-debug/CMakeFiles/peer_review3.dir
+/Users/jgloria/CLionProjects/Praktikum_CLion/Sprint13/Refactoring/peer_review3/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/jgloria/CLionProjects/Praktikum_CLion/Sprint13/Refactoring/peer_review3/cmake-build-debug/CMakeFiles/rebuild_cache.dir
